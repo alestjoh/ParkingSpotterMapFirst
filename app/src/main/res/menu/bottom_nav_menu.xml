@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/search" />
+
+    <item
+        android:id="@+id/navigation_find"
+        android:icon="@android:drawable/ic_media_pause"
+        android:title="@string/find" />
+
+    <item
+        android:id="@+id/navigation_reservation"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="@string/reservation" />
+
+    <item
+        android:id="@+id/navigation_my_car"
+        android:icon="@android:drawable/stat_notify_sdcard_usb"
+        android:title="@string/my_car" />
+
+</menu>
