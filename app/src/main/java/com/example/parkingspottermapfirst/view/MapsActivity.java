@@ -137,7 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     markerInfo.put(marker, spot);
                 }
 
-                mMap.setInfoWindowAdapter(new SpotMarkerWindowAdapter(markerInfo));
+                mMap.setInfoWindowAdapter(new SpotMarkerWindowAdapter(markerInfo, this));
             }
         });
     }
