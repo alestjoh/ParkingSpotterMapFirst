@@ -5,5 +5,8 @@
     <string name="reservation">Reservation</string>
     <string name="my_car">My Car</string>
     <string name="title_activity_maps">Map</string>
+    <string name="location">Location</string>
+    <string name="date">Date</string>
+    <string name="time">Time</string>
 
 </resources>
