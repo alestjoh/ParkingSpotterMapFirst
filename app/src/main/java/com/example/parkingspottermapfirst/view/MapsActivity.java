@@ -64,11 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         Double.parseDouble(spot.lat),
                         Double.parseDouble(spot.lng));
 
-//                Toast.makeText(this,
-//                        location.toString(), Toast.LENGTH_LONG).show();
-
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-
                 mMap.addMarker(new MarkerOptions()
                         .position(location)
                         .title(spot.name)
