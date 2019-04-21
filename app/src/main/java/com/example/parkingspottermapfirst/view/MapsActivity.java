@@ -41,7 +41,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MainViewModel viewModel = null;
 
     private GoogleMap mMap;
-    private CardView searchCardView;
 
     private boolean cardIsDown = true, animating = false;
 
@@ -50,8 +49,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        searchCardView = findViewById(R.id.searchCardView);
+        initAnimation();
+        initViewModel();
 
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    private void initAnimation() {
+        CardView searchCardView = findViewById(R.id.searchCardView);
         findViewById(R.id.btnMoveCard).setOnClickListener(view -> {
             if (!animating) {
                 int translateDist = cardIsDown ? -280 : 280;
@@ -62,13 +72,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 animating = true;
             }
         });
-
-        initViewModel();
-
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
     }
 
     private void initViewModel() {
@@ -79,18 +82,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         viewModel.getError().observe(this, s ->
                 Toast.makeText(this, s, Toast.LENGTH_LONG).show());
         viewModel.getSpots().observe(this, list -> {
-            for (SpotData spot : list) {
-                LatLng location = new LatLng(
-                        Double.parseDouble(spot.lat),
-                        Double.parseDouble(spot.lng));
+            if (list != null) {
+                for (SpotData spot : list) {
+                    LatLng location = new LatLng(
+                            Double.parseDouble(spot.lat),
+                            Double.parseDouble(spot.lng));
 
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-                mMap.addMarker(new MarkerOptions()
-                        .position(location)
-                        .title(spot.name)
-                        .snippet("ID: " + spot.id)
-                        .icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+                    mMap.addMarker(new MarkerOptions()
+                            .position(location)
+                            .title(spot.name)
+                            .snippet("ID: " + spot.id)
+                            .icon(BitmapDescriptorFactory
+                                    .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                }
             }
         });
     }
