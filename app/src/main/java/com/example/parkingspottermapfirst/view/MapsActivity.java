@@ -1,6 +1,7 @@
 package com.example.parkingspottermapfirst.view;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -10,6 +11,9 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.CardView;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Toast;
 
 import com.example.parkingspottermapfirst.R;
@@ -26,7 +30,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Animator.AnimatorListener {
 
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
     private static final int DEFAULT_ZOOM = 15;
@@ -37,11 +41,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     MainViewModel viewModel = null;
 
     private GoogleMap mMap;
+    private CardView searchCardView;
+
+    private boolean cardIsDown = true, animating = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        searchCardView = findViewById(R.id.searchCardView);
+
+        findViewById(R.id.btnMoveCard).setOnClickListener(view -> {
+            if (!animating) {
+                int translateDist = cardIsDown ? -280 : 280;
+                searchCardView.animate().translationYBy(translateDist).setListener(MapsActivity.this).start();
+                view.animate().translationYBy(translateDist).start();
+
+                cardIsDown = !cardIsDown;
+                animating = true;
+            }
+        });
 
         initViewModel();
 
@@ -151,5 +171,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap = googleMap;
 
         checkFineLocationPermissions();
+    }
+
+    @Override
+    public void onAnimationStart(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationEnd(Animator animation) {
+        animating = false;
+    }
+
+    @Override
+    public void onAnimationCancel(Animator animation) {
+
+    }
+
+    @Override
+    public void onAnimationRepeat(Animator animation) {
+
     }
 }
