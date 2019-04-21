@@ -4,16 +4,16 @@ import android.Manifest;
 import android.animation.Animator;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationProvider;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
-import android.view.animation.Animation;
-import android.view.animation.TranslateAnimation;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.parkingspottermapfirst.R;
@@ -25,10 +25,15 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Animator.AnimatorListener {
 
@@ -36,11 +41,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int DEFAULT_ZOOM = 15;
     private static final double DEFAULT_LAT = 37.422, DEFAULT_LNG = -122.084;
     public static final int REQUEST_LOCATION_PERMISSIONS = 17;
-    private double lat = 0, lng = 0;
+
+    private double userLat = 0, userLng = 0, searchLat = 0, searchLng = 0;
 
     MainViewModel viewModel = null;
 
     private GoogleMap mMap;
+    EditText etLocation;
 
     private boolean cardIsDown = true, animating = false;
 
@@ -51,6 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         initAnimation();
         initViewModel();
+        initSearchButton();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -60,12 +68,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    private void initSearchButton() {
+        etLocation = findViewById(R.id.etLocation);
+        findViewById(R.id.btnSearch).setOnClickListener(view -> {
+            String address = etLocation.getText().toString();
+            if (!address.isEmpty()) {
+                Geocoder geocoder = new Geocoder(MapsActivity.this);
+                try {
+                    List<Address> allAddresses = geocoder.getFromLocationName(address, 5);
+                    if (allAddresses == null || allAddresses.isEmpty()) {
+                        throw new IOException("No addresses found!");
+                    }
+                    Address location = allAddresses.get(0);
+                    searchLat = location.getLatitude();
+                    searchLng = location.getLongitude();
+
+                    searchForSpotsAtLocation();
+                } catch (IOException e) {
+                    Toast.makeText(MapsActivity.this,
+                            "Unrecognized location: " + address, Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private void initAnimation() {
         CardView searchCardView = findViewById(R.id.searchCardView);
         findViewById(R.id.btnMoveCard).setOnClickListener(view -> {
             if (!animating) {
                 int translateDist = cardIsDown ? -280 : 280;
-                searchCardView.animate().translationYBy(translateDist).setListener(MapsActivity.this).start();
+                searchCardView.animate()
+                        .translationYBy(translateDist)
+                        .setListener(MapsActivity.this)
+                        .start();
                 view.animate().translationYBy(translateDist).start();
 
                 cardIsDown = !cardIsDown;
@@ -83,33 +119,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(this, s, Toast.LENGTH_LONG).show());
         viewModel.getSpots().observe(this, list -> {
             if (list != null) {
+                Map<Marker, SpotData> markerInfo = new HashMap<>();
+
                 for (SpotData spot : list) {
                     LatLng location = new LatLng(
                             Double.parseDouble(spot.lat),
                             Double.parseDouble(spot.lng));
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-                    mMap.addMarker(new MarkerOptions()
+                    Marker marker = mMap.addMarker(new MarkerOptions()
                             .position(location)
                             .title(spot.name)
                             .snippet("ID: " + spot.id)
                             .icon(BitmapDescriptorFactory
                                     .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                    markerInfo.put(marker, spot);
                 }
+
+                mMap.setInfoWindowAdapter(new SpotMarkerWindowAdapter(markerInfo));
             }
         });
     }
 
     private void searchForSpotsAtLocation() {
-        viewModel.searchForSpots(lat, lng);
-
-        mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lng))
-                .title("Current location")
-                .icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(lat, lng), DEFAULT_ZOOM));
+        viewModel.searchForSpots(searchLat, searchLng);
     }
 
     private void checkFineLocationPermissions() {
@@ -143,23 +177,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     this::onGetLocation);
         } else {
             setLocationAsDefault();
-            searchForSpotsAtLocation();
         }
     }
 
     private void setLocationAsDefault() {
-        lat = DEFAULT_LAT;
-        lng = DEFAULT_LNG;
+        userLat = DEFAULT_LAT;
+        userLng = DEFAULT_LNG;
     }
 
     private void onGetLocation(Location location) {
         if (location == null) {
             setLocationAsDefault();
         } else {
-            lat = location.getLatitude();
-            lng = location.getLongitude();
+            userLat = location.getLatitude();
+            userLng = location.getLongitude();
         }
-        searchForSpotsAtLocation();
     }
 
     /**
