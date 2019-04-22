@@ -3,6 +3,7 @@ package com.example.parkingspottermapfirst.view;
 import android.Manifest;
 import android.animation.Animator;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -43,11 +44,13 @@ public class MapsActivity extends FragmentActivity
     private static final int TRANSLATE_DIST = 285;
     private static final double DEFAULT_LAT = 37.422, DEFAULT_LNG = -122.084;
     public static final int REQUEST_LOCATION_PERMISSIONS = 17;
+    public static final String SPOT_DATA_EXTRA = "spot_data_extra";
 
     private double userLat = 0, userLng = 0, searchLat = 0, searchLng = 0;
 
     MainViewModel viewModel = null;
 
+    private Map<Marker, SpotData> markerInfo = null;
     private GoogleMap mMap;
     EditText etLocation;
 
@@ -131,7 +134,7 @@ public class MapsActivity extends FragmentActivity
 
     private void onGetNewSpots(List<SpotData> list) {
         if (list != null) {
-            Map<Marker, SpotData> markerInfo = new HashMap<>();
+            markerInfo = new HashMap<>();
 
             for (SpotData spot : list) {
                 LatLng location = new LatLng(
@@ -217,7 +220,7 @@ public class MapsActivity extends FragmentActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        mMap.setOnInfoWindowClickListener(this);
         checkFineLocationPermissions();
     }
 
@@ -242,6 +245,17 @@ public class MapsActivity extends FragmentActivity
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        //TODO Move to other activity
+        if (markerInfo == null) {
+            return;
+        }
+        SpotData spotData = markerInfo.get(marker);
+        if (spotData == null) {
+            return;
+        }
+
+        Intent intent = new Intent();
+        intent.setClass(this, SpotDetailsActivity.class);
+        intent.putExtra(SPOT_DATA_EXTRA, spotData);
+        startActivity(intent);
     }
 }
