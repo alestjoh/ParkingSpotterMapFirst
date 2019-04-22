@@ -35,7 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Animator.AnimatorListener {
+public class MapsActivity extends FragmentActivity
+        implements OnMapReadyCallback, Animator.AnimatorListener,
+        GoogleMap.OnInfoWindowClickListener {
 
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
     private static final int TRANSLATE_DIST = 285;
@@ -85,8 +87,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     searchForSpotsAtLocation();
                 } catch (IOException e) {
-                    Toast.makeText(MapsActivity.this,
-                            "Unrecognized location: " + address, Toast.LENGTH_LONG).show();
+                    onError("Unrecognized location: " + address);
                     e.printStackTrace();
                     return;
                 }
@@ -122,34 +123,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void initViewModel() {
         viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-
         viewModel.initRetrofit();
 
-        viewModel.getError().observe(this, s ->
-                Toast.makeText(this, s, Toast.LENGTH_LONG).show());
-        viewModel.getSpots().observe(this, list -> {
-            if (list != null) {
-                Map<Marker, SpotData> markerInfo = new HashMap<>();
+        viewModel.getError().observe(this, this::onError);
+        viewModel.getSpots().observe(this, this::onGetNewSpots);
+    }
 
-                for (SpotData spot : list) {
-                    LatLng location = new LatLng(
-                            Double.parseDouble(spot.lat),
-                            Double.parseDouble(spot.lng));
+    private void onGetNewSpots(List<SpotData> list) {
+        if (list != null) {
+            Map<Marker, SpotData> markerInfo = new HashMap<>();
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
-                    Marker marker = mMap.addMarker(new MarkerOptions()
-                            .position(location)
-                            .title(spot.name)
-                            .snippet("ID: " + spot.id)
-                            .icon(BitmapDescriptorFactory
-                                    .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            for (SpotData spot : list) {
+                LatLng location = new LatLng(
+                        Double.parseDouble(spot.lat),
+                        Double.parseDouble(spot.lng));
 
-                    markerInfo.put(marker, spot);
-                }
+                mMap.moveCamera(CameraUpdateFactory.newLatLng(location));
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(location)
+                        .title(spot.name)
+                        .snippet("ID: " + spot.id)
+                        .icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_RED)));
 
-                mMap.setInfoWindowAdapter(new SpotMarkerWindowAdapter(markerInfo, this));
+                markerInfo.put(marker, spot);
             }
-        });
+
+            mMap.setInfoWindowAdapter(new SpotMarkerWindowAdapter(markerInfo, this));
+        }
     }
 
     private void searchForSpotsAtLocation() {
@@ -221,9 +222,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onAnimationStart(Animator animation) {
-
-    }
+    public void onAnimationStart(Animator animation) { }
 
     @Override
     public void onAnimationEnd(Animator animation) {
@@ -231,12 +230,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onAnimationCancel(Animator animation) {
+    public void onAnimationCancel(Animator animation) { }
 
+    @Override
+    public void onAnimationRepeat(Animator animation) { }
+
+
+    private void onError(String s) {
+        Toast.makeText(this, s, Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void onAnimationRepeat(Animator animation) {
-
+    public void onInfoWindowClick(Marker marker) {
+        //TODO Move to other activity
     }
 }

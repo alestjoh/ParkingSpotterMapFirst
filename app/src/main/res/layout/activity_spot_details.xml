@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.SpotDetailsActivity">
+
+    <ImageView
+        android:id="@+id/ivFakePicture"
+        android:layout_width="0dp"
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/parking_spot" />
+
+    <ImageView
+        android:id="@+id/ivSlightShade"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:alpha=".5"
+        android:scaleType="fitXY"
+        android:tint="@color/colorPrimaryDark"
+        android:tintMode="src_over"
+        app:layout_constraintBottom_toBottomOf="@+id/ivFakePicture"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="?attr/actionModeBackground" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="217dp"
+        android:text="TextView"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        app:layout_constraintStart_toStartOf="@+id/ivFakePicture"
+        app:layout_constraintTop_toTopOf="@id/ivFakePicture" />
+
+    <Button
+        android:id="@+id/btnPayToReserve"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/pay_to_reserve"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+</android.support.constraint.ConstraintLayout>

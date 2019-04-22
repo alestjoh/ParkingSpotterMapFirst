@@ -40,20 +40,16 @@ public class SpotMarkerWindowAdapter implements GoogleMap.InfoWindowAdapter {
             return null;
         }
 
+        contents.setOnClickListener(view -> {
+            Toast.makeText(contents.getContext().getApplicationContext(),
+                    "You clicked: " + spotData.name, Toast.LENGTH_LONG).show();
+        });
+
         ((TextView)contents.findViewById(R.id.tvName)).setText(spotData.name);
         ((TextView)contents.findViewById(R.id.tvAddress)).setText(spotData.name);
         ((TextView)contents.findViewById(R.id.tvOpenSpots)).setText((spotData.id) % 30 + 1 + "");
         ((TextView)contents.findViewById(R.id.tvCost)).setText(spotData.cost_per_minute);
         ((TextView)contents.findViewById(R.id.tvDist)).setText(spotData.lat);
-
-        contents.findViewById(R.id.btnPayAndReserveInfoWindow).setOnClickListener(view -> {
-            //TODO: create popup confirmation window
-            Toast.makeText(contents.getContext(), "You clicked PAY!", Toast.LENGTH_LONG).show();
-        });
-        contents.findViewById(R.id.btnDetailsInfoWindow).setOnClickListener(view -> {
-            //TODO: launch the details activity
-            Toast.makeText(contents.getContext(), "You clicked MORE INFO!", Toast.LENGTH_LONG).show();
-        });
 
         return contents;
     }
