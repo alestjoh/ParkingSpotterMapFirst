@@ -38,7 +38,7 @@ import java.util.Map;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Animator.AnimatorListener {
 
     private static final String LOG_TAG = MapsActivity.class.getSimpleName();
-    private static final int DEFAULT_ZOOM = 15;
+    private static final int TRANSLATE_DIST = 285;
     private static final double DEFAULT_LAT = 37.422, DEFAULT_LNG = -122.084;
     public static final int REQUEST_LOCATION_PERMISSIONS = 17;
 
@@ -88,6 +88,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Toast.makeText(MapsActivity.this,
                             "Unrecognized location: " + address, Toast.LENGTH_LONG).show();
                     e.printStackTrace();
+                    return;
+                }
+                if (cardIsDown && !animating) {
+                    findViewById(R.id.searchCardView).animate()
+                            .translationYBy(-TRANSLATE_DIST)
+                            .setListener(MapsActivity.this)
+                            .start();
+                    findViewById(R.id.btnMoveCard).animate()
+                            .translationYBy(-TRANSLATE_DIST)
+                            .start();
                 }
             }
         });
@@ -97,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         CardView searchCardView = findViewById(R.id.searchCardView);
         findViewById(R.id.btnMoveCard).setOnClickListener(view -> {
             if (!animating) {
-                int translateDist = cardIsDown ? -280 : 280;
+                int translateDist = cardIsDown ? -TRANSLATE_DIST : TRANSLATE_DIST;
                 searchCardView.animate()
                         .translationYBy(translateDist)
                         .setListener(MapsActivity.this)
