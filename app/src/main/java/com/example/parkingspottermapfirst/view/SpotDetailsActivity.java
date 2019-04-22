@@ -1,5 +1,6 @@
 package com.example.parkingspottermapfirst.view;
 
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -23,7 +24,11 @@ public class SpotDetailsActivity extends AppCompatActivity {
         tvName.setText(spotData.name);
 
         findViewById(R.id.btnPayToReserve).setOnClickListener(view -> {
-            //Do stuff
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction()
+                    .add(R.id.fragmentPlaceholder, ConfirmationFragment.newInstance())
+                    .addToBackStack(null)
+                    .commit();
         });
     }
 }
