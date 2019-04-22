@@ -43,6 +43,10 @@ public class MainViewModel extends ViewModel {
     }
 
     public void searchForSpots(double lat, double lng) {
+        if (api == null) {
+            initRetrofit();
+        }
+
         api.getNearbySpots(lat, lng).enqueue(new Callback<List<SpotData>>() {
             @Override
             public void onResponse(
@@ -60,17 +64,11 @@ public class MainViewModel extends ViewModel {
         });
     }
 
-    public void reserveSpot(int id, int minutes) {
-        api.reserveSpot(id, minutes).enqueue(new Callback<SpotData>() {
-            @Override
-            public void onResponse(Call<SpotData> call, Response<SpotData> response) {
-                error.postValue("Spot reserved: " + response.body().id);
-            }
+    public void reserveSpot(int id, int minutes, Callback<SpotData> callback) {
+        if (api == null) {
+            initRetrofit();
+        }
 
-            @Override
-            public void onFailure(Call<SpotData> call, Throwable t) {
-                error.postValue("Spot not reserved: " + t.getMessage());
-            }
-        });
+        api.reserveSpot(id, minutes).enqueue(callback);
     }
 }
